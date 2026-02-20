@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FitSmart AI - Personal Fitness Plan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>FitSmart AI 💪</h1>
+        <p>Generate your personalized beginner-friendly fitness plan!</p>
+        <form id="fitnessForm">
+            <input type="number" name="age" placeholder="Age" min="10" required>
+            <select name="gender" required>
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+            </select>
+            <select name="goal" required>
+                <option value="">Fitness Goal</option>
+                <option value="weight loss">Weight Loss</option>
+                <option value="muscle gain">Muscle Gain</option>
+                <option value="general fitness">General Fitness</option>
+            </select>
+            <select name="preference" required>
+                <option value="">Workout Preference</option>
+                <option value="home">Home</option>
+                <option value="gym">Gym</option>
+                <option value="yoga">Yoga</option>
+                <option value="cardio">Cardio</option>
+            </select>
+            <input type="number" name="time" placeholder="Minutes per day" min="10" required>
+            <button type="submit">Generate Plan</button>
+        </form>
+
+        <div id="loading" style="display:none;">Generating your plan...</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("fitnessForm");
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").innerHTML = "";
+
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch("/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                document.getElementById("loading").style.display = "none";
+
+                if (result.error) {
+                    document.getElementById("result").innerHTML = `<p class="error">${result.error}</p>`;
+                } else {
+                    document.getElementById("result").innerHTML = `<div class="card"><pre>${result.plan}</pre></div>`;
+                }
+            } catch (err) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("result").innerHTML = `<p class="error">Something went wrong</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
